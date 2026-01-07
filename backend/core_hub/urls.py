@@ -16,7 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.http import JsonResponse
+
+def api_hello(request):
+    return JsonResponse({"message": "Sawasdee from Django Backend! 🐍"})
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/hello/', api_hello),
 ]

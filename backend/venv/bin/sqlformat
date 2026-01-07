@@ -1,4 +1,4 @@
-#!/home/noppawut/my-private-cloud/my-private-cloud/backend/venv/bin/python3
+#!/home/noppawut/my-private-cloud/backend/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
