@@ -18,7 +18,7 @@ onMounted(async () => {
 
 <template>
   <div class="container">
-    <h1>My Private Cloud ☁️</h1>
+    <h1>My Private Cloud</h1>
     <div class="card">
       <h2>Status from Backend:</h2>
       <p class="response">{{ message }}</p>

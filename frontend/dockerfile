@@ -1,0 +1,19 @@
+# ใช้ Node รุ่นเล็ก (Alpine)
+FROM node:lts-alpine
+
+WORKDIR /app
+
+# ก๊อปปี้ไฟล์ package.json เข้าไปก่อน (เพื่อให้ Docker จำ Cache ได้)
+COPY package.json package-lock.json* ./
+
+# ติดตั้ง library
+RUN npm install
+
+# ก๊อปปี้โค้ดที่เหลือ
+COPY . .
+
+# เปิดประตู Port 5173
+EXPOSE 5173
+
+# คำสั่งรัน Vue (ต้องระบุ host เพื่อให้เครื่องข้างนอกมองเห็น)
+CMD ["npm", "run", "dev", "--", "--host"]

@@ -19,7 +19,7 @@ from django.urls import path
 from django.http import JsonResponse
 
 def api_hello(request):
-    return JsonResponse({"message": "Sawasdee from Django Backend! 🐍"})
+    return JsonResponse({"message": "Sawasdee from Django Backend!"})
 
 urlpatterns = [
     path('admin/', admin.site.urls),
