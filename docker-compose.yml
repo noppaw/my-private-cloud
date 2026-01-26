@@ -1,42 +1,68 @@
+version: '3.8'
+
 services:
   # 1. ส่วนของ Database (Postgres)
   db:
     image: postgres:15-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    env_file:
+      - .env
+    # ไม่ต้อง map environment ซ้ำซ้อน ถ้าใน .env ชื่อตรงกันแล้ว (POSTGRES_...)
+    # Image ของ Postgres จะอ่านค่าจาก .env โดยตรง
 
   # 2. ส่วนของ Backend (Django)
   backend:
     build: ./backend
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./backend:/app  # เชื่อมโฟลเดอร์เพื่อให้แก้โค้ดแล้วเปลี่ยนทันที
+      - ./backend:/app
     ports:
       - "8000:8000"
     depends_on:
       - db
+    env_file:
+      - .env
     environment:
+      # ✅ Mapping ค่าจาก .env ให้ Django เข้าใจ
       - SECRET_KEY=${SECRET_KEY}
       - DEBUG=${DEBUG}
       - DB_NAME=${POSTGRES_DB}
       - DB_USER=${POSTGRES_USER}
       - DB_PASS=${POSTGRES_PASSWORD}
-      - DB_HOST=${DB_HOST}
+      - DB_HOST=db  
+      # (DB_HOST ควรเป็นชื่อ service คือ "db" ตรงๆ หรือถ้าใน .env มี DB_HOST ก็ใช้ ${DB_HOST})
+
+  # ✅ ส่วนของ Cron (แก้แล้ว: เพิ่ม environment ให้เหมือน backend)
+  cron:
+    build: ./backend
+    command: sh -c "while true; do python manage.py notify; sleep 60; done"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - backend
+    env_file:
+      - .env
+    environment:
+      # ✅ ต้องใส่ตรงนี้เพิ่มครับ Cron ถึงจะรู้จัก Database
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG}
+      - DB_NAME=${POSTGRES_DB}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASS=${POSTGRES_PASSWORD}
+      - DB_HOST=db
 
   # 3. ส่วนของ Frontend (Vue)
   frontend:
     build: ./frontend
     volumes:
       - ./frontend:/app
-      - /app/node_modules # ป้องกัน node_modules หาย
+      - /app/node_modules
     ports:
       - "5173:5173"
     environment:
-      - CHOKIDAR_USEPOLLING=true # ช่วยให้ Hot Reload ทำงานใน WSL2 ได้ดีขึ้น
+      - CHOKIDAR_USEPOLLING=true
 
 volumes:
   postgres_data:
